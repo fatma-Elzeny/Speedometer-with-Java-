@@ -29,11 +29,11 @@ Ensure you have the following dependencies in your **Maven `pom.xml`**:
         <version>21</version>
     </dependency>
     <!-- Medusa Gauge Library -->
-    <dependency>
-        <groupId>eu.hansolo</groupId>
-        <artifactId>Medusa</artifactId>
-        <version>11.9</version>
-    </dependency>
+     <dependency>
+            <groupId>eu.hansolo</groupId>
+            <artifactId>medusa</artifactId>
+            <version>21.0.9</version>
+     </dependency>
 </dependencies>
 ```
 

@@ -1,0 +1,4 @@
+module-info.class
+com/mycompany/speedometer/SecondaryController.class
+com/mycompany/speedometer/PrimaryController.class
+com/mycompany/speedometer/App.class
