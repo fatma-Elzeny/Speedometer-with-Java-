@@ -40,26 +40,24 @@ public class PrimaryController implements Initializable {
     /**
      * Initializes the controller class.
      */
-      private final Random random = new Random();
+    private final Random random = new Random();
     @FXML
     private Label warningLabel;
-      
+
     @Override
-    
+
     public void initialize(URL url, ResourceBundle rb) {
-       
-         setupGauge();
-   
-      
-        
+
+        setupGauge();
+        updateSpeedometer();
+
     }
-    
-      private void setupGauge() {
-             
-        
-         // Set initial speed
+
+    private void setupGauge() {
+
+        // Set initial speed
         speedometer.setValue(80);
-         speedometer.setMinValue(0);
+        speedometer.setMinValue(0);
         speedometer.setMaxValue(160);
         speedometer.setTitle("Speed");
         speedometer.setUnit("KM/H");
@@ -76,15 +74,40 @@ public class PrimaryController implements Initializable {
         speedometer.setTickLabelColor(javafx.scene.paint.Color.LIGHTGRAY);
         speedometer.setSectionsVisible(true);
         speedometer.setSections(
-            new Section(0, 50, Color.GREEN),  // Safe speed
-            new Section(50, 100, Color.YELLOW), // Warning speed
-            new Section(100, 160, Color.RED)   // Danger speed
+                new Section(0, 50, Color.GREEN), // Safe speed
+                new Section(50, 100, Color.YELLOW), // Warning speed
+                new Section(100, 160, Color.RED) // Danger speed
         );
-         warningLabel.setVisible(false);
-      }
-
-        
+        warningLabel.setVisible(false);
     }
 
+    private void updateSpeedometer() {
+        new Thread(() -> {
+            try {
+                while (true) {
+                    double speed = random.nextDouble() * 160;
+                    double latitude = 30.0 + random.nextDouble();  // Example latitude
+                    double longitude = 31.0 + random.nextDouble(); // Example longitude
 
-   
+                    Platform.runLater(() -> {
+                        speedometer.setValue(speed);
+                        latitudeLabel.setText(String.format("Latitude: %.6f", latitude));
+                        longitudeLabel.setText(String.format("Longitude: %.6f", longitude));
+                        if (speed > 120) {
+                            warningLabel.setText("⚠️ Speed Limit Exceeded!");
+                            warningLabel.setTextFill(Color.RED);
+                            warningLabel.setVisible(true);
+                        } else {
+                            warningLabel.setVisible(false);
+                        }
+                    });
+
+                    Thread.sleep(2000);
+                }
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }).start();
+    }
+
+}
