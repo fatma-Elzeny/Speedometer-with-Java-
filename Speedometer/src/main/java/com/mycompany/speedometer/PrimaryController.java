@@ -4,6 +4,7 @@
  */
 package com.mycompany.speedometer;
 
+import static com.mycompany.speedometer.SpeedAlarm.checkSpeed;
 import eu.hansolo.medusa.Gauge;
 import eu.hansolo.medusa.Section;
 import eu.hansolo.medusa.TickLabelOrientation;
@@ -93,11 +94,13 @@ public class PrimaryController implements Initializable {
                         speedometer.setValue(speed);
                         latitudeLabel.setText(String.format("Latitude: %.6f", latitude));
                         longitudeLabel.setText(String.format("Longitude: %.6f", longitude));
+                        checkSpeed(speed);
                         if (speed > 120) {
                             warningLabel.setText("⚠️ Speed Limit Exceeded!");
                             warningLabel.setTextFill(Color.RED);
                             warningLabel.setVisible(true);
-                        } else {
+                        } 
+                        else {
                             warningLabel.setVisible(false);
                         }
                     });
