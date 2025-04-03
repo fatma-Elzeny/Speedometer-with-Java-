@@ -1,4 +1,5 @@
+com/mycompany/speedometer/GPSData.class
 module-info.class
-com/mycompany/speedometer/SecondaryController.class
 com/mycompany/speedometer/PrimaryController.class
 com/mycompany/speedometer/App.class
+com/mycompany/speedometer/SpeedAlarm.class
