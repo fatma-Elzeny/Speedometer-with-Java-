@@ -4,68 +4,45 @@
  */
 package com.mycompany.speedometer;
 
-import static com.mycompany.speedometer.SpeedAlarm.checkSpeed;
 import eu.hansolo.medusa.Gauge;
 import eu.hansolo.medusa.Section;
-import eu.hansolo.medusa.TickLabelOrientation;
-import eu.hansolo.medusa.TickMarkType;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
 import java.net.URL;
-import java.util.Random;
 import java.util.ResourceBundle;
 import javafx.scene.control.Label;
-import javafx.scene.image.ImageView;
+import javafx.scene.paint.Color;
 
-/**
- * FXML Controller class
- *
- * @author fatma
- */
 public class PrimaryController implements Initializable {
 
     @FXML
     private Gauge speedometer;
     @FXML
-    private Label titleLabel;
-    @FXML
-    private ImageView image;
+    private Label titleLabel; // Kept as per request
     @FXML
     private Label latitudeLabel;
     @FXML
     private Label longitudeLabel;
-
-    /**
-     * Initializes the controller class.
-     */
-    private final Random random = new Random();
     @FXML
     private Label warningLabel;
 
+    private volatile boolean running = true;
+
     @Override
-
     public void initialize(URL url, ResourceBundle rb) {
-
         setupGauge();
-        updateSpeedometer();
-
+        updateGPSData();
     }
 
     private void setupGauge() {
-
-        // Set initial speed
-        speedometer.setValue(80);
+        speedometer.setValue(0);
         speedometer.setMinValue(0);
         speedometer.setMaxValue(160);
         speedometer.setTitle("Speed");
         speedometer.setUnit("KM/H");
         speedometer.setAnimated(true);
         speedometer.setAutoScale(true);
-
-        // Custom Look
         speedometer.setNeedleColor(javafx.scene.paint.Color.RED);
         speedometer.setBackgroundPaint(javafx.scene.paint.Color.BLACK);
         speedometer.setBorderPaint(javafx.scene.paint.Color.DARKGRAY);
@@ -75,42 +52,38 @@ public class PrimaryController implements Initializable {
         speedometer.setTickLabelColor(javafx.scene.paint.Color.LIGHTGRAY);
         speedometer.setSectionsVisible(true);
         speedometer.setSections(
-                new Section(0, 50, Color.GREEN), // Safe speed
-                new Section(50, 100, Color.YELLOW), // Warning speed
-                new Section(100, 160, Color.RED) // Danger speed
+                new Section(0, 50, Color.GREEN),
+                new Section(50, 100, Color.YELLOW),
+                new Section(100, 160, Color.RED)
         );
         warningLabel.setVisible(false);
     }
 
-    private void updateSpeedometer() {
+    private void updateGPSData() {
         new Thread(() -> {
-            try {
-                while (true) {
-                    double speed = random.nextDouble() * 160;
-                    double latitude = 30.0 + random.nextDouble();  // Example latitude
-                    double longitude = 31.0 + random.nextDouble(); // Example longitude
+            while (running) {
+                GPSReader reader = GPSData.getReader(); // Get the reader from GPSData
+                if (reader != null) { // Check if reader is available
+                    GPSData data = reader.getLatestData();
 
                     Platform.runLater(() -> {
-                        speedometer.setValue(speed);
-                        latitudeLabel.setText(String.format("Latitude: %.6f", latitude));
-                        longitudeLabel.setText(String.format("Longitude: %.6f", longitude));
-                        checkSpeed(speed);
-                        if (speed > 120) {
-                            warningLabel.setText("⚠️ Speed Limit Exceeded!");
-                            warningLabel.setTextFill(Color.RED);
-                            warningLabel.setVisible(true);
-                        } 
-                        else {
-                            warningLabel.setVisible(false);
-                        }
+                        latitudeLabel.setText(String.format("Latitude: %.6f° %s", data.getLatitude(), data.getLatDirection()));
+                        longitudeLabel.setText(String.format("Longitude: %.6f° %s", data.getLongitude(), data.getLonDirection()));
+                        speedometer.setValue(data.getSpeedKmh());
+                        SpeedAlarm.checkSpeed(data.getSpeedKmh());
                     });
-
-                    Thread.sleep(2000);
                 }
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+
+                try {
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }).start();
     }
 
+    public void stop() {
+        running = false;
+    }
 }

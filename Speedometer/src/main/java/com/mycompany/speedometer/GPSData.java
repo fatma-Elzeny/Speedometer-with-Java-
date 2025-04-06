@@ -17,6 +17,9 @@ public class GPSData {
     private final String lonDirection;
     private final boolean isValid;
 
+    
+    private static GPSReader reader;
+
     public GPSData(double speedKmh, double latitude, double longitude, String latDirection, String lonDirection, boolean isValid) {
         this.speedKmh = speedKmh;
         this.latitude = latitude;
@@ -50,8 +53,16 @@ public class GPSData {
         return isValid;
     }
 
-    // Static method for invalid data
     public static GPSData noFix() {
-        return new GPSData(0.0, 0.0, 0.0, "", "", false);
+        return new GPSData(0.0, 0.0, 0.0, "N/A", "N/A", false);
+    }
+
+    // Static methods to manage the GPSReader
+    public static void setReader(GPSReader gpsReader) {
+        reader = gpsReader;
+    }
+
+    public static GPSReader getReader() {
+        return reader;
     }
 }
