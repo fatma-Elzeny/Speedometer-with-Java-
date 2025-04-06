@@ -1,3 +1,9 @@
+/***
+ * PrimaryController.java:
+ * - Manages the UI (speedometer, labels) and updates it with GPS data in a separate thread.
+ * - It also triggers the speed alarm.
+ */
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/javafx/FXMLController.java to edit this template
@@ -20,17 +26,23 @@ import javafx.scene.paint.Color;
 
 public class PrimaryController implements Initializable {
 
+    /**
+     * UI components
+     */
+    
     @FXML
     private Gauge speedometer;
     @FXML
-    private Label titleLabel; // Kept as per request
+    private Label titleLabel; 
     @FXML
     private Label latitudeLabel;
     @FXML
     private Label longitudeLabel;
     @FXML
     private Label warningLabel;
-
+    /***
+     * running: boolean (volatile) - Controls the update thread.
+     */
     private volatile boolean running = true;
 
     @Override

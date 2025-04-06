@@ -1,3 +1,10 @@
+/***
+ * GPSData.java: A dual-purpose class. 
+ * - It acts as an immutable data holder for GPS information (speed, latitude, longitude, etc.) 
+ * - And statically manages the single GPSReader instance.
+ * 
+ */
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
@@ -10,6 +17,9 @@ package com.mycompany.speedometer;
  */
 
 public class GPSData {
+    /***
+     * Instance fields - Store specific GPS data points.
+     */
     private final double speedKmh;
     private final double latitude;
     private final double longitude;
@@ -17,7 +27,10 @@ public class GPSData {
     private final String lonDirection;
     private final boolean isValid;
 
-    
+    /***
+     * reader: GPSReader (static) :
+     * Holds the single GPSReader instance shared across the app.
+     */
     private static GPSReader reader;
 
     public GPSData(double speedKmh, double latitude, double longitude, String latDirection, String lonDirection, boolean isValid) {
