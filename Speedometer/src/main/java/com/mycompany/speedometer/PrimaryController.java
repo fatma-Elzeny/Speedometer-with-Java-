@@ -87,6 +87,12 @@ public class PrimaryController implements Initializable {
                         longitudeLabel.setText(String.format("Longitude: %.6f° %s", data.getLongitude(), data.getLonDirection()));
                         speedometer.setValue(data.getSpeedKmh());
                         SpeedAlarm.checkSpeed(data.getSpeedKmh());
+                        if(data.getSpeedKmh()> SpeedAlarm.SPEED_LIMIT)
+                        {
+                            warningLabel.setVisible(true);
+                            warningLabel.setText("⚠️ Speed Limit Exceeded!");
+                            warningLabel.setTextFill(Color.RED);
+                        }
                     });
                 }
 
