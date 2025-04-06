@@ -1,7 +1,6 @@
 package com.mycompany.speedometer;
 
 import com.fazecast.jSerialComm.SerialPort;
-import com.mycompany.speedometer.GPSData;
 import java.io.IOException;
 import java.io.InputStream;
 
