@@ -29,7 +29,7 @@ The GUI runs over **VNC**, allowing remote monitoring.
 
 ---
 
-## 📊 Project Structure
+### 📂 Project Structure
 
 ```
 SpeedometerProject/
@@ -37,18 +37,121 @@ SpeedometerProject/
 │   ├── main/
 │   │   ├── java/
 │   │   │   ├── com.mycompany.speedometer/
-│   │   │   │   ├── App.java
-│   │   │   │   ├── GPSReader.java
-│   │   │   │   ├── GPSData.java
-│   │   │   │   ├── PrimaryController.java
-│   │   │   │   ├── SpeedAlarm.java
+│   │   │   │   ├── App.java              # Main JavaFX launcher
+│   │   │   │   ├── GPSReader.java        # Reads and parses GPS data
+│   │   │   │   ├── GPSData.java          # Data model for GPS values
+│   │   │   │   ├── PrimaryController.java # JavaFX controller
+│   │   │   │   ├── SpeedAlarm.java        # Sound alerts for speed limits
 │   │   └── resources/
-│   │       ├── primary.fxml
+│   │       ├── primary.fxml               # UI layout file (JavaFX Scene Builder)
 │   │       ├── map.html (for Leaflet map)
 └── pom.xml
 ```
 
 ---
+
+## 🧱 Software Architecture
+
+```
++-------------------------+
+|   JavaFX Application    |
+|-------------------------|
+|  App.java               | ← Main entry point
+|  └─ Loads primary.fxml  |
+|                         |
+|  ┌───────────────┐      |
+|  │Controller     │◄─────┐
+|  │(Dashboard)    │      │
+|  └───────────────┘      │
+|     ▲                  ▼
+|  ┌───────────────┐   ┌────────────┐
+|  │  GPSReader    │   │ SpeedAlarm │
+|  │  (UART logic) │   │ (Sound/FX) │
+|  └───────────────┘   └────────────┘
+|         ▲
+|     Reads GPS
+|         ▲
+|     Serial Comm
++---------┼---------------+
+          ▼
+   /dev/ttyS0 on Raspberry Pi
+```
+
+---
+
+## 🔌 Hardware Architecture
+
+```
++-------------------------+
+|     GPS Module (e.g.,   |
+|     NEO-6M or u-blox)   |
+|-------------------------|
+| TX ───────► GPIO 15     |
+| RX ◄─────── GPIO 14     |
+| VCC ─────── 5V          |
+| GND ─────── GND         |
++-------------------------+
+           │
+           ▼
++-------------------------+
+|   Raspberry Pi 3/4      |
+|-------------------------|
+|  Raspbian OS + VNC      |
+|  Java 17 + Maven        |
+|  JavaFX + Leaflet Map   |
++-------------------------+
+```
+
+---
+
+## 🔁 Project Flow
+
+1. **UART Setup**: `GPSReader` opens `/dev/ttyS0`, sets baud rate (9600), and starts reading NMEA frames.
+2. **Data Parsing**: Parses `$GPRMC` frames to extract speed, latitude, longitude.
+3. **Data Update**: The parsed `GPSData` is shared with `DashboardController`.
+4. **JavaFX UI Update**: GUI elements like Gauge, Labels, and Map are updated on the main thread.
+5. **Speed Alarm**: If speed > 120 km/h, a red warning and sound alert are triggered.
+6. **Map Integration**: Leaflet map updates current location using the GPS coordinates.
+
+---
+
+## 🌐 Features
+
+- Real-time speedometer gauge
+- Latitude and longitude labels
+- Over-speed alert with sound and red highlight
+- UART serial communication with GPS
+- Leaflet-based map to show live location
+- Fully runnable on Raspberry Pi + VNC
+
+---
+
+## 🚀 How to Run on Raspberry Pi
+```bash
+# Package the app
+mvn clean package
+
+# Run JavaFX App with OpenJFX modules
+java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar target/Speedometer-1.0-SNAPSHOT.jar
+```
+
+---
+
+## 📡 GPS Setup Instructions
+(See full section above for detailed steps on wiring and software setup)
+
+---
+
+## 📍 Map Integration with Leaflet
+- Load HTML into a JavaFX `WebView`
+- HTML loads Leaflet with OpenStreetMap tiles
+- GPS data updates location marker in JavaScript using Java-JS bridge
+
+---
+
+Let me know if you want a diagram added or exported as PDF/Markdown!
+
+
 ## 🛠 Dependencies
 Ensure you have the following dependencies in your **Maven `pom.xml`**:
 
@@ -93,29 +196,36 @@ Ensure you have the following dependencies in your **Maven `pom.xml`**:
 ---
 
 ## 📲 Functions Breakdown
+1. **`App`**
+   - **Role**: The entry point of the JavaFX application. It initializes the app, sets up the GPS connection, loads the UI, and cleans up when the app closes.
+   - **Key Variables**:
+     - `scene: Scene` (static) - Holds the JavaFX UI scene.
 
-### GPSReader.java
-- Reads serial UART data.
-- Parses NMEA `$GPRMC` lines.
-- Converts coordinates.
-- Returns `GPSData` with speed, lat, lon, directions.
+2. **`GPSData`**
+   - **Role**: A dual-purpose class. It acts as an immutable data holder for GPS information (speed, latitude, longitude, etc.) and statically manages the single `GPSReader` instance.
+   - **Key Variables**:
+     - Instance fields (`speedKmh`, `latitude`, etc.) - Store specific GPS data points.
+     - `reader: GPSReader` (static) - Holds the single `GPSReader` instance shared across the app.
 
-### PrimaryController.java
-- UI logic
-- Starts update thread
-- Sets labels and gauge values
-- Injects lat/lon to map.html
-- Handles alerts and stop conditions
+3. **`GPSReader`**
+   - **Role**: Handles communication with the GPS device via UART, parses `$GPRMC` NMEA sentences, and updates the latest GPS data.
+   - **Key Variables**:
+     - `serialPort: SerialPort` - Manages the UART connection.
+     - `running: boolean` (volatile) - Controls the reading thread.
+     - `latestData: GPSData` - Stores the most recent parsed GPS data.
 
-### Speedometer (Medusa)
-- Customized gauge
-- Red section from 120 to 180
-- Needle shows speed in km/h
+4. **`PrimaryController`**
+   - **Role**: Manages the UI (speedometer, labels) and updates it with GPS data in a separate thread. It also triggers the speed alarm.
+   - **Key Variables**:
+     - `speedometer: Gauge`, `latitudeLabel: Label`, etc. (FXML) - UI components.
+     - `running: boolean` (volatile) - Controls the update thread.
 
-### Map Integration
-- `map.html` uses **Leaflet.js**
-- JavaFX WebView loads the HTML
-- Coordinates injected dynamically
+5. **`SpeedAlarm`**
+   - **Role**: Plays an audio alarm when speed exceeds a limit and stops it when below.
+   - **Key Variables**:
+     - `SPEED_LIMIT: int` (static final) - Threshold for alarm (120 km/h).
+     - `isPlaying: boolean` (static) - Tracks alarm state.
+     - `clip: Clip` (static) - Audio clip for the alarm.
 
 ---
 
@@ -182,7 +292,7 @@ Run with VNC Viewer to view GUI remotely.
 
 ## ✨ Authors
 - Developed by: [Fatma Yosry , Mohamed Awadin , Omar Alaa]
-- 
+
 
 ---
 

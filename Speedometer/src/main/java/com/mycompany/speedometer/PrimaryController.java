@@ -2,6 +2,10 @@
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/javafx/FXMLController.java to edit this template
  */
+/**
+ *
+ * @author fatma
+ */
 package com.mycompany.speedometer;
 
 import eu.hansolo.medusa.Gauge;
