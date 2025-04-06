@@ -41,7 +41,7 @@ public class GPSReader {
                         if (!line.isEmpty()) {
                             System.out.println("Raw UART data: " + line);
                             System.out.println("Processing: " + line);
-                            //latestData = processNMEA(line);
+                            latestData = processDATA(line);
                         }
                     }
                 }
@@ -49,6 +49,33 @@ public class GPSReader {
             }
         } catch (IOException | InterruptedException e) {
             System.err.println("Error reading UART: " + e.getMessage());
+        }
+    }
+    
+    private GPSData processDATA(String data) {
+        String[] parts = data.split(",");
+
+        if (data.startsWith("$GPRMC") && parts.length >= 12) {
+            boolean hasFix = "A".equals(parts[2]);
+            if (hasFix && !parts[3].isEmpty() && !parts[4].isEmpty()
+                    && !parts[5].isEmpty() && !parts[6].isEmpty()
+                    && !parts[7].isEmpty()) {
+                try {
+                    double latitude = parseCoordinate(parts[3], parts[4]);
+                    double longitude = parseCoordinate(parts[5], parts[6]);
+                    String latDir = parts[4];
+                    String lonDir = parts[6];
+                    double speedKnots = Double.parseDouble(parts[7]);
+                    double speedKmh = speedKnots * 1.852;
+                    return new GPSData(speedKmh, latitude, longitude, latDir, lonDir, true);
+                } catch (NumberFormatException e) {
+                    System.out.println("Invalid GPRMC data: " + data);
+                }
+            }
+            return GPSData.noFix();
+        } else {
+            System.out.println("Skipping unsupported or incomplete NMEA frame: " + data);
+            return latestData;
         }
     }
 
@@ -60,6 +87,10 @@ public class GPSReader {
             serialPort.closePort();
             System.out.println("UART closed");
         }
+    }
+    
+    public GPSData getLatestData() {
+        return latestData;
     }
 
  
