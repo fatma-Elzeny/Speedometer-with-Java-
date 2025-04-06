@@ -1,0 +1,23 @@
+.root {
+    -fx-background-color: #121212;  /* Dark background */
+    -fx-text-fill: #ffffff;         /* White text */
+}
+
+/* Labels */
+.label {
+    -fx-text-fill: #ffffff;
+    -fx-font-size: 16px;
+}
+
+/* Speedometer Gauge */
+.gauge {
+    -fx-background-color: #1e1e1e;
+    -fx-border-color: #333333;
+}
+
+/* Warning Label */
+.warning {
+    -fx-text-fill: red;
+    -fx-font-weight: bold;
+    -fx-font-size: 18px;
+}

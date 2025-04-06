@@ -1,0 +1,8 @@
+module com.mycompany.gauge {
+    requires javafx.controls;
+    requires javafx.fxml;
+
+    opens com.mycompany.gauge to javafx.fxml;
+    exports com.mycompany.gauge;
+    requires eu.hansolo.medusa;
+}
