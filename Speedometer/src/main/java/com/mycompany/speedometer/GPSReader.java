@@ -19,12 +19,38 @@ public class GPSReader {
         serialPort.setComPortTimeouts(SerialPort.TIMEOUT_READ_SEMI_BLOCKING, 5000, 0);
         if (serialPort.openPort()) {
             System.out.println("UART opened successfully on /dev/ttyS0");
-        //    new Thread(this::readUART).start();
+            new Thread(this::readUART).start();
         } else {
             System.err.println("Failed to open UART on /dev/ttyS0");
         }
     }
 
+    void readUART() {
+        try (InputStream input = serialPort.getInputStream()) {
+            byte[] buffer = new byte[1024];
+            StringBuilder sentence = new StringBuilder();
+            while (running) {
+                int bytesRead = input.read(buffer);
+                if (bytesRead > 0) {
+                    String data = new String(buffer, 0, bytesRead);
+                    sentence.append(data);
+                    int newlineIndex;
+                    while ((newlineIndex = sentence.indexOf("\n")) != -1) {
+                        String line = sentence.substring(0, newlineIndex).trim();
+                        sentence.delete(0, newlineIndex + 1);
+                        if (!line.isEmpty()) {
+                            System.out.println("Raw UART data: " + line);
+                            System.out.println("Processing: " + line);
+                            //latestData = processNMEA(line);
+                        }
+                    }
+                }
+                Thread.sleep(100);
+            }
+        } catch (IOException | InterruptedException e) {
+            System.err.println("Error reading UART: " + e.getMessage());
+        }
+    }
 
     
 
