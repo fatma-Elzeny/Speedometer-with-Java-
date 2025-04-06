@@ -21,6 +21,7 @@ public class App extends Application {
         Parent root = loader.load();
         PrimaryController controller = loader.getController(); // Get the controller
         controller.setGPSReader(reader); // Pass the GPSReader to the controller
+        root.setUserData(controller); // Store the controller in userData
 
         scene = new Scene(root, 640, 480);
         stage.setScene(scene);
@@ -30,9 +31,12 @@ public class App extends Application {
 
     @Override
     public void stop() {
-        GPSReader reader = ((PrimaryController) scene.getRoot().getUserData()).getGPSReader(); // Get reader from controller
-        if (reader != null) {
-            reader.stop(); // Stop the GPSReader
+        Object userData = scene.getRoot().getUserData();
+        if (userData instanceof PrimaryController) {
+            GPSReader reader = ((PrimaryController) userData).getGPSReader();
+            if (reader != null) {
+                reader.stop(); // Stop the GPSReader
+            }
         }
         SpeedAlarm.stop();
     }
