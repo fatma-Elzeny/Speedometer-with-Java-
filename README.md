@@ -115,41 +115,6 @@ SpeedometerProject/
 
 ---
 
-## 🌐 Features
-
-- Real-time speedometer gauge
-- Latitude and longitude labels
-- Over-speed alert with sound and red highlight
-- UART serial communication with GPS
-- Leaflet-based map to show live location
-- Fully runnable on Raspberry Pi + VNC
-
----
-
-## 🚀 How to Run on Raspberry Pi
-```bash
-# Package the app
-mvn clean package
-
-# Run JavaFX App with OpenJFX modules
-java --module-path /opt/javafx/lib --add-modules javafx.controls,javafx.fxml -jar target/Speedometer-1.0-SNAPSHOT.jar
-```
-
----
-
-## 📡 GPS Setup Instructions
-(See full section above for detailed steps on wiring and software setup)
-
----
-
-## 📍 Map Integration with Leaflet
-- Load HTML into a JavaFX `WebView`
-- HTML loads Leaflet with OpenStreetMap tiles
-- GPS data updates location marker in JavaScript using Java-JS bridge
-
----
-
-Let me know if you want a diagram added or exported as PDF/Markdown!
 
 
 ## 🛠 Dependencies
