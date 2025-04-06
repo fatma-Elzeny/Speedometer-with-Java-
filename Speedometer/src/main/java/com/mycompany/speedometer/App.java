@@ -25,7 +25,14 @@ public class App extends Application {
         stage.show();
     }
 
-    
+       @Override
+    public void stop() {
+        GPSReader reader = GPSData.getReader(); // Get the reader from GPSData
+        if (reader != null) {
+            reader.stop(); // Stop the GPSReader
+        }
+       // SpeedAlarm.stop();
+    }
 
     static void setRoot(String fxml) throws IOException {
         scene.setRoot(loadFXML(fxml));
