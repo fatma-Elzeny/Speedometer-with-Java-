@@ -1,3 +1,10 @@
+/***
+ * GPSReader.java : 
+ * - Handles communication with the GPS device via UART.
+ * - Parses $GPRMC NMEA sentences
+ * - Updates the latest GPS data.
+ */
+
 package com.mycompany.speedometer;
 
 import com.fazecast.jSerialComm.SerialPort;
@@ -6,10 +13,19 @@ import java.io.IOException;
 import java.io.InputStream;
 
 public class GPSReader {
+    /***
+     *  SerialPort: SerialPort - Manages the UART connection.
+     */
     private SerialPort serialPort;
+    /***
+     * running: boolean (volatile) - Controls the reading thread
+     */
     private volatile boolean running = true;
+    /***
+     * LatestData: GPSData - Stores the most recent parsed GPS data.
+     */
     private GPSData latestData = GPSData.noFix();
-
+    
     public void setupUART() {
         serialPort = SerialPort.getCommPort("/dev/ttyS0");
         serialPort.setBaudRate(9600);

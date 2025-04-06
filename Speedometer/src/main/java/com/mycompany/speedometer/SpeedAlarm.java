@@ -1,3 +1,8 @@
+/***
+ * SpeedAlarm.java :
+ * Role: Plays an audio alarm when speed exceeds a limit and stops it when below.
+ */
+
 /*
  * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
  * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
@@ -16,8 +21,17 @@ import javax.sound.sampled.*;
  */
 public class SpeedAlarm
 {
+    /***
+     * SPEED_LIMIT: int (static final) - Threshold for alarm (120 km/h).
+     */
     private static final int SPEED_LIMIT = 120; 
+    /***
+     * isPlaying: boolean (static) - Tracks alarm state.
+     */
     private static boolean isPlaying = false;
+    /***
+     * clip: Clip (static) - Audio clip for the alarm.
+     */
     private static Clip clip;
 
     public static void checkSpeed(double speed)
