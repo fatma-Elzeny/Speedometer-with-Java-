@@ -285,7 +285,7 @@ vncviewer <rpi-ip>  # e.g., vncviewer 192.168.1.100
 - Ideal for vehicle dashboards or GPS tracking applications.
 
 <p align='center'>
-<img width="95%" src="./readme_images/result.png"/>
+<img width="95%" src="./readme_images/result.jpeg"/>
 </p>
 ---
 ## Referances:
