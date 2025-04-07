@@ -111,6 +111,14 @@ private static void playAlarm()
 
         }
     }
+    
+    public static void stop() {
+        if (clip != null && clip.isRunning()) {
+            clip.stop();
+            clip.close();
+        }
+        isPlaying = false;
+    }
     private static void showSpeedAlert() 
     {
         if (speedAlert == null) { /*Only create if not already shown*/
