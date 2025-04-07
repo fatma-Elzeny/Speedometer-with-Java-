@@ -1,7 +1,6 @@
-/***
- * PrimaryController.java:
- * - Manages the UI (speedometer, labels) and updates it with GPS data in a separate thread.
- * - It also triggers the speed alarm.
+/**
+ * Where: PrimaryController.initialize() and PrimaryController.updateGPSData()
+ * What Happens: The UI loads, configures the speedometer, and starts a thread to update the UI with GPS data.
  */
 
 /*
@@ -47,16 +46,31 @@ public class PrimaryController implements Initializable {
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
+        /**
+         * Configures the speedometer UI (detailed below).
+         */
         setupGauge();
+        /**
+         * Starts a thread to update the UI with GPS data
+         */
         updateGPSData();
     }
 
     private void setupGauge() {
-        speedometer.setValue(0);
+        speedometer.setValue(0);//Sets initial speed to 0 km/h.
+        /**
+         * Sets speedometer range (0-160 km/h).
+         */
         speedometer.setMinValue(0);
         speedometer.setMaxValue(160);
+        /**
+         * Labels the gauge as "Speed" in "KM/H".
+         */
         speedometer.setTitle("Speed");
         speedometer.setUnit("KM/H");
+        /**
+         * Enables smooth needle animation and auto-scaling.
+         */
         speedometer.setAnimated(true);
         speedometer.setAutoScale(true);
         speedometer.setNeedleColor(javafx.scene.paint.Color.RED);
@@ -76,16 +90,37 @@ public class PrimaryController implements Initializable {
     }
 
     private void updateGPSData() {
+        /**
+         * Starts a background thread to update the UI every 2 seconds.
+         */
         new Thread(() -> {
+            /**
+             * Loops as long as running is true (stops when stop() is called).
+             */
             while (running) {
-                GPSReader reader = GPSData.getReader(); // Get the reader from GPSData
-                if (reader != null) { // Check if reader is available
+                /**
+                 * Gets the GPSReader instance set by App from GPSData.
+                 */
+                GPSReader reader = GPSData.getReader();
+                /**
+                 * Ensures the reader is available before proceeding
+                 */
+                if (reader != null) { 
+                    //Retrieves the latest parsed GPS data from GPSReader.
                     GPSData data = reader.getLatestData();
-
+                    /**
+                     * Runs UI updates on the JavaFX Application Thread (required for UI changes).
+                     */
                     Platform.runLater(() -> {
+                        /**
+                         * Updates the latitude, Longitude labels, and the speedometer with the speed on km/h
+                         */
                         latitudeLabel.setText(String.format("Latitude: %.6f° %s", data.getLatitude(), data.getLatDirection()));
                         longitudeLabel.setText(String.format("Longitude: %.6f° %s", data.getLongitude(), data.getLonDirection()));
                         speedometer.setValue(data.getSpeedKmh());
+                        /**
+                         * Checks if the speed triggers the alarm , and appeare label warning message 
+                         */
                         SpeedAlarm.checkSpeed(data.getSpeedKmh());
                         if(data.getSpeedKmh()> SpeedAlarm.SPEED_LIMIT)
                         {
@@ -97,6 +132,9 @@ public class PrimaryController implements Initializable {
                 }
 
                 try {
+                    /**
+                     * Pauses 2 seconds between updates.
+                     */
                     Thread.sleep(2000);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
