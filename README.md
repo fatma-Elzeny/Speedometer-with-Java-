@@ -284,6 +284,9 @@ vncviewer <rpi-ip>  # e.g., vncviewer 192.168.1.100
 - Remote monitoring via VNC on Raspberry Pi.
 - Ideal for vehicle dashboards or GPS tracking applications.
 
+<p align='center'>
+<img width="95%" src="./readme_images/result.png"/>
+</p>
 ---
 ## Referances:
 - https://docs.oracle.com/javase/8/docs/api/java/lang/StringBuilder.html
