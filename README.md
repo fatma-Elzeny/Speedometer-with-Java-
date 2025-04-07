@@ -47,67 +47,32 @@ SpeedometerProject/
 │   │       ├── alert.wav                  # Audio file for speed alert
 └── pom.xml                                 # Maven configuration
 ```
+## 🧱 Static UML Design :
+<p align='center'>
+<img width="95%" src="./readme_images/uml_staticdesign.png"/>
+</p> 
 
 ---
-
 ## 🧱 Software Architecture
 
-```
-+-------------------------+
-|   JavaFX Application    |
-|-------------------------|
-|  App.java               | ← Launches app, sets up GPSReader
-|  └─ Loads primary.fxml  |
-|                         |
-|  ┌───────────────┐      |
-|  │PrimaryController│◄────┐
-|  │(UI Management) │     │
-|  └───────────────┘     ▼
-|     ▲                 ┌────────────┐
-|     | Updates UI      │ SpeedAlarm │
-|     |                 │(Audio/Pop-up)│
-|  ┌───────────────┐   └────────────┘
-|  │  GPSReader    │         ▲
-|  │  (UART Logic) │         |
-|  └───────────────┘         |
-|         ▲                  |
-|     Reads/Writes GPSData  |
-|         ▲                  |
-|  ┌───────────────┐         |
-|  │   GPSData     │◄────────┘
-|  │(Data & Manager)│
-|  └───────────────┘
-|         ▲
-|     Serial Comm
-+---------┼---------------+
-          ▼
-   /dev/ttyS0 (GPS Module)
-```
+<p align='center'>
+<img width="95%" src="./readme_images/soft_arch.png"/>
+</p> 
+
+
+##### You can see All the Project Software Flow Chart:
+
+[flowchart.md]()
+
+
 
 ---
 
 ## 🔌 Hardware Architecture
 
-```
-+-------------------------+
-|     GPS Module          |
-|     (e.g., NEO-7M)      |
-|-------------------------|
-| TX  ───────► GPIO 15    |
-| RX  ◄─────── GPIO 14    |
-| VCC ─────── 5V          |
-| GND ─────── GND         |
-+-------------------------+
-           │
-           ▼
-+-------------------------+
-|   Raspberry Pi 3/4      |
-|-------------------------|
-|  Raspbian OS + VNC      |
-|  Java 17 + Maven        |
-|  JavaFX + Medusa        |
-+-------------------------+
-```
+<p align='center'>
+<img width="95%" src="./readme_images/hard_flow.png"/>
+</p> 
 
 ---
 
