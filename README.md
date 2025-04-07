@@ -285,6 +285,20 @@ vncviewer <rpi-ip>  # e.g., vncviewer 192.168.1.100
 - Ideal for vehicle dashboards or GPS tracking applications.
 
 ---
+## Referances:
+- https://docs.oracle.com/javase/8/docs/api/java/lang/StringBuilder.html
+- https://www.tpointtech.com/stringbuilder-in-java
+- https://docs.oracle.com/javase/8/docs/api/javax/sound/sampled/AudioInputStream.html
+
+- https://github.com/Fazecast/jSerialComm
+- https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html
+- https://docs.oracle.com/javase/8/docs/api/java/io/BufferedInputStream.html
+
+- https://docs.oracle.com/javase/8/docs/api/javax/sound/sampled/package-summary.html
+
+- https://docs.oracle.com/javase/8/javafx/api/javafx/scene/control/Alert.html
+
+---
 
 ## ✨ Authors
 - Developed by: [Fatma Yosry, Mohamed Awadin, Omar Alaa]
