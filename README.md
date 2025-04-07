@@ -283,7 +283,7 @@ vncviewer <rpi-ip>  # e.g., vncviewer 192.168.1.100
 - Audio and visual alerts for over-speed conditions.
 - Remote monitoring via VNC on Raspberry Pi.
 - Ideal for vehicle dashboards or GPS tracking applications.
-
+---
 <p align='center'>
 <img width="95%" src="./readme_images/result.jpeg"/>
 </p>
