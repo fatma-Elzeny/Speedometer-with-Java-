@@ -1,31 +1,34 @@
 # JavaFX GPS Speedometer Dashboard (Raspberry Pi Edition)
 
 ## 📌 Project Overview
-This project is a **JavaFX-based Speedometer Dashboard** designed to run on a **Raspberry Pi with Raspbian OS**. It connects to a **UART-based GPS module** (e.g., NEO-7M) via `/dev/ttyS0` to display real-time **speed**, **latitude**, and **longitude**. Key features include:
+This project is a **JavaFX-based Speedometer Dashboard** designed to run on a **Raspberry Pi with Raspbian OS**. It connects to a **UART-based GPS module** (e.g., NEO-7M) via to display real-time **speed**, **latitude**, and **longitude**. Developed as part of our 9-month Embedded Systems training at ITI, it showcases a blend of hardware and software for vehicle dashboards or GPS tracking. Key features include:
 
 - A dynamic speedometer gauge powered by the **Medusa library**.
-- Live GPS coordinate labels.
-- Audio and pop-up alerts when speed exceeds **120 km/h**.
-- Remote monitoring capability via **VNC**.
+- Live GPS coordinates and map visualization.
+- Audio, pop-up, and disconnect alerts for safety.
+- Remote monitoring via **VNC**.
 
-The application is built for simplicity and efficiency, making it suitable for vehicle speed monitoring or outdoor GPS tracking on a Raspberry Pi.
+The application is optimized for simplicity and efficiency on the Raspberry Pi.
 
 ---
 
 ## 🚀 Features
 - 📡 **Real-time GPS Data**: Reads latitude, longitude, and speed from a GPS module using NMEA `$GPRMC` sentences.
-- 🚗 **Live Speed Monitoring**: Displays speed in km/h on a customizable speedometer gauge.
-- ⚠ **Over-Speed Alerts**: Triggers an audio alarm and a pop-up warning when speed exceeds 120 km/h.
+- 🚗 **Live Speed Monitoring**: Displays speed in km/h on a customizable speedometer gauge (0-160 km/h, green: 0-50, yellow: 50-100, red: 100-160).
+- 🗺 **Live Map Display**: Shows GPS coordinates on a web view map with a moving pin for real-time location tracking.
+- ⚠ **Over-Speed Alerts**: Triggers an audio alarm and pop-up warning when speed exceeds 120 km/h.
+- 🔌 **Disconnect Alerts**: Shows a pop-up if the GPS module is unplugged (e.g., TX wire removed).
 - 🖥 **Raspberry Pi Compatible**: Runs on Raspbian with VNC for remote GUI access.
 
 ---
 
 ## 🔍 Main Implementation Points
 - **UART GPS Parsing**: Processes `$GPRMC` NMEA frames to extract speed and coordinates.
-- **Real-time UI Updates**: Updates the speedometer and labels every 2 seconds using a background thread.
-- **Custom Gauge**: Uses Medusa’s `Gauge` for a visually appealing speedometer with colored sections (green: 0-50, yellow: 50-100, red: 100-160).
-- **Alert System**: Combines audio playback (`alert.wav`) and a JavaFX `Alert` dialog for over-speed warnings.
-- **Clean Shutdown**: Properly closes UART connections and stops audio on app exit.
+- **Real-time UI Updates**: Updates the speedometer, labels, and map every 2 seconds using a background thread.
+- **Custom Gauge**: Uses Medusa’s `Gauge` for a visually appealing speedometer with colored sections and a red needle.
+- **Web View Map**: Integrates a `WebView` to display a live map with a moving pin based on GPS coordinates.
+- **Alert System**: Combines audio playback (`alert.wav`), JavaFX `Alert` dialogs for over-speed, and pop-ups for GPS disconnects.
+- **Clean Shutdown**: Closes UART connections, stops audio, and halts map updates on app exit.
 
 ---
 
@@ -41,35 +44,31 @@ SpeedometerProject/
 │   │   │   │   ├── GPSData.java          # GPS data model and GPSReader manager
 │   │   │   │   ├── GPSReader.java        # UART GPS data reader and parser
 │   │   │   │   ├── PrimaryController.java # JavaFX UI controller
-│   │   │   │   ├── SpeedAlarm.java        # Audio and pop-up alerts for speed limits
+│   │   │   │   ├── SpeedAlarm.java        # Audio, pop-up, and disconnect alerts
 │   │   └── resources/
 │   │       ├── primary.fxml               # JavaFX UI layout (Scene Builder)
 │   │       ├── alert.wav                  # Audio file for speed alert
 └── pom.xml                                 # Maven configuration
 ```
-## 🧱 Static UML Design :
+
+## 🧱 Static UML Design
 <p align='center'>
 <img width="95%" src="./readme_images/uml_staticdesign.png"/>
 </p> 
 
 ---
-## 🧱 Software Architecture
 
+## 🧱 Software Architecture
 <p align='center'>
 <img width="95%" src="./readme_images/soft_arch.png"/>
 </p> 
 
-
-##### You can see All the Project Software Flow Chart:
-
+##### See the Project Software Flow Chart:
 [flowchart.md]()
-
-
 
 ---
 
 ## 🔌 Hardware Architecture
-
 <p align='center'>
 <img width="95%" src="./readme_images/hard_flow.png"/>
 </p> 
@@ -77,7 +76,6 @@ SpeedometerProject/
 ---
 
 ## 🔁 Project Flow
-
 1. **App Startup**:
    - `App` creates a `GPSReader` and starts UART communication on `/dev/ttyS0`.
    - Stores the `GPSReader` in `GPSData` for shared access.
@@ -89,14 +87,15 @@ SpeedometerProject/
 
 3. **UI Updates**:
    - `PrimaryController` runs a thread to fetch `latestData` from `GPSReader` (via `GPSData`) every 2 seconds.
-   - Updates the speedometer gauge and coordinate labels on the JavaFX thread.
+   - Updates the speedometer gauge, coordinate labels, and web view map on the JavaFX thread.
 
-4. **Speed Alerts**:
+4. **Speed and Disconnect Alerts**:
    - If speed > 120 km/h, `SpeedAlarm` plays `alert.wav` in a loop and shows a pop-up warning.
-   - When speed drops to ≤ 120 km/h, the audio stops and the pop-up closes.
+   - If the GPS module is unplugged (e.g., TX wire removed), a pop-up alerts the user.
+   - Alerts stop when speed ≤ 120 km/h or GPS reconnects.
 
 5. **Shutdown**:
-   - `App.stop()` closes the UART connection and stops any active alerts.
+   - `App.stop()` closes the UART connection, stops audio, and halts map updates.
 
 ---
 
@@ -114,6 +113,11 @@ Update your `pom.xml` with these dependencies:
     <dependency>
         <groupId>org.openjfx</groupId>
         <artifactId>javafx-fxml</artifactId>
+        <version>17.0.1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.openjfx</groupId>
+        <artifactId>javafx-web</artifactId>
         <version>17.0.1</version>
     </dependency>
     <!-- Medusa Gauge Library -->
@@ -134,19 +138,19 @@ Update your `pom.xml` with these dependencies:
 ---
 
 ## 🎛 Medusa Library
-The **Medusa library**, developed by Hansolo (Gerrit Grunwald), is a powerful open-source Java library for creating customizable gauges and dashboards in JavaFX applications. It provides a wide range of gauge types (e.g., radial, linear) with extensive styling options, making it ideal for real-time data visualization.
+The **Medusa library**, developed by Hansolo (Gerrit Grunwald), is a powerful open-source Java library for creating customizable gauges in JavaFX applications. It’s ideal for real-time data visualization.
 
 ### Role in the Project
-- **Speedometer Gauge**: Medusa’s `Gauge` class is used in `PrimaryController` to display the vehicle’s speed in km/h. It’s configured with:
+- **Speedometer Gauge**: Medusa’s `Gauge` class displays speed in km/h, configured with:
   - **Range**: 0 to 160 km/h.
-  - **Sections**: Colored zones (green: 0-50, yellow: 50-100, red: 100-160) for quick visual feedback.
-  - **Styling**: Red needle, black background, white values, and animated transitions.
-- **Real-time Updates**: The gauge updates every 2 seconds with speed data from `GPSReader`, leveraging Medusa’s smooth animation capabilities.
+  - **Sections**: Green (0-50), yellow (50-100), red (100-160) for quick feedback.
+  - **Styling**: Red needle, black background, white values, gray UI background, and animated transitions.
+- **Real-time Updates**: Updates every 2 seconds with speed data from `GPSReader`.
 
 ### Why Medusa?
-- **Ease of Use**: Simplifies creating professional gauges without building from scratch.
-- **Customization**: Offers properties like `needleColor`, `sections`, and `unit` to match the project’s aesthetic.
-- **Performance**: Lightweight and optimized for JavaFX, suitable for Raspberry Pi’s limited resources.
+- **Ease of Use**: Simplifies professional gauge creation.
+- **Customization**: Supports `needleColor`, `sections`, and `unit` for aesthetic alignment.
+- **Performance**: Lightweight for Raspberry Pi.
 
 ### Example Configuration
 ```java
@@ -173,12 +177,12 @@ For more details, visit the [Medusa GitHub repository](https://github.com/HanSol
 3. **`GPSData.java`**:
    - Stores parsed GPS data and provides access to the `GPSReader`.
 4. **`PrimaryController.java`**:
-   - Configures the speedometer.
-   - Updates UI with speed and coordinates every 2 seconds.
-   - Triggers `SpeedAlarm` when speed exceeds 120 km/h.
+   - Configures the speedometer and web view map.
+   - Updates UI with speed, coordinates, and map every 2 seconds.
+   - Triggers `SpeedAlarm` for speed or disconnect alerts.
 5. **`SpeedAlarm.java`**:
-   - Plays an audio alert and shows a pop-up when speed > 120 km/h.
-   - Stops both when speed ≤ 120 km/h.
+   - Plays audio and shows pop-ups for speed > 120 km/h or GPS disconnects.
+   - Stops alerts when conditions resolve.
 
 ---
 
@@ -201,18 +205,18 @@ For more details, visit the [Medusa GitHub repository](https://github.com/HanSol
      - `latestData` - Latest GPS data.
 
 4. **`PrimaryController`**
-   - **Role**: Manages UI updates and triggers alerts.
+   - **Role**: Manages UI updates, map display, and alerts.
    - **Key Variables**: 
-     - `speedometer`, `latitudeLabel`, etc. (FXML) - UI elements.
+     - `speedometer`, `latitudeLabel`, `webView`, etc. (FXML) - UI elements.
      - `running` (volatile) - Update thread control.
 
 5. **`SpeedAlarm`**
-   - **Role**: Handles audio and pop-up alerts for speed > 120 km/h.
+   - **Role**: Handles audio and pop-up alerts for speed > 120 km/h and GPS disconnects.
    - **Key Variables**: 
      - `SPEED_LIMIT` (static final) - 120 km/h threshold.
      - `isPlaying` (static) - Tracks alert state.
      - `clip` (static) - Audio playback.
-     - `speedAlert` (static) - Pop-up dialog.
+     - `speedAlert`, `disconnectAlert` (static) - Pop-up dialogs.
 
 ---
 
@@ -270,36 +274,47 @@ vncviewer <rpi-ip>  # e.g., vncviewer 192.168.1.100
 ---
 
 ## 🚫 Alerts
-- **Trigger**: Speed > 120 km/h.
-- **Audio**: Plays `alert.wav` in a loop (stored in `src/main/resources/`).
-- **Pop-up**: Displays a JavaFX `Alert` with "Speed Limit Exceeded" message.
-- **Stop**: Audio and pop-up stop when speed ≤ 120 km/h.
+- **Over-Speed Alert**:
+  - **Trigger**: Speed > 120 km/h.
+  - **Audio**: Plays `alert.wav` in a loop.
+  - **Pop-up**: Shows a JavaFX `Alert` with "Speed Limit Exceeded" message.
+  - **Stop**: Audio and pop-up stop when speed ≤ 120 km/h.
+- **Disconnect Alert**:
+  - **Trigger**: GPS module unplugged (e.g., TX wire removed).
+  - **Pop-up**: Shows a JavaFX `Alert` with "GPS Disconnected" message.
+  - **Stop**: Pop-up closes when GPS reconnects.
 
 ---
 
 ## 🎉 Final Outcome
-- Real-time speedometer and GPS coordinate display.
+- Real-time speedometer, GPS coordinates, and live map display.
 - UART-based GPS parsing (`$GPRMC`).
-- Audio and visual alerts for over-speed conditions.
+- Audio, visual, and disconnect alerts for safety.
 - Remote monitoring via VNC on Raspberry Pi.
-- Ideal for vehicle dashboards or GPS tracking applications.
-
----
-## Referances:
-- https://docs.oracle.com/javase/8/docs/api/java/lang/StringBuilder.html
-- https://www.tpointtech.com/stringbuilder-in-java
-- https://docs.oracle.com/javase/8/docs/api/javax/sound/sampled/AudioInputStream.html
-
-- https://github.com/Fazecast/jSerialComm
-- https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html
-- https://docs.oracle.com/javase/8/docs/api/java/io/BufferedInputStream.html
-
-- https://docs.oracle.com/javase/8/docs/api/javax/sound/sampled/package-summary.html
-
-- https://docs.oracle.com/javase/8/javafx/api/javafx/scene/control/Alert.html
+- Ideal for vehicle dashboards or GPS tracking.
+<p align='center'>
+<img width="95%" src="./readme_images/result.jpeg"/>
+</p>
 
 ---
 
-## ✨ Authors
-- Developed by: [Fatma Yosry, Mohamed Awadin, Omar Alaa]
+## 📚 References
+- [StringBuilder](https://docs.oracle.com/javase/8/docs/api/java/lang/StringBuilder.html)
+- [StringBuilder Tutorial](https://www.tpointtech.com/stringbuilder-in-java)
+- [AudioInputStream](https://docs.oracle.com/javase/8/docs/api/javax/sound/sampled/AudioInputStream.html)
+- [jSerialComm](https://github.com/Fazecast/jSerialComm)
+- [InputStream](https://docs.oracle.com/javase/8/docs/api/java/io/InputStream.html)
+- [BufferedInputStream](https://docs.oracle.com/javase/8/docs/api/java/io/BufferedInputStream.html)
+- [JavaFX Alert](https://docs.oracle.com/javase/8/javafx/api/javafx/scene/control/Alert.html)
+- [JavaFX WebView](https://docs.oracle.com/javase/8/javafx/api/javafx/scene/web/WebView.html)
+
+---
+
+## ✨ Authors & Acknowledgments
+- **Developed by**: [Mohamed Awadin](https://github.com/MohamedAwadin), [Fatma Yosry](https://github.com/fatma-Elzeny), [Omar Alaa](https://github.com/OmarAlaa8184)
+- **Acknowledgments**:
+  - A massive thank you to our incredible team for their relentless dedication, brilliant ideas, and unstoppable spirit in making this project shine.
+  - Huge gratitude to **Eng. Youssef Nofal**, Head of Embedded System Track, for his expert guidance in mastering embedded systems.
+  - Special thanks to **Eng. Ahmed Mazen**, Mobile Applications Development Stream Manager at JETS-ITI, for his insightful feedback that turned our project into a true real-world product.
+
 ---
