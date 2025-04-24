@@ -9,18 +9,13 @@
 <?import javafx.scene.layout.FlowPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.text.Font?>
+<?import javafx.scene.web.WebView?>
 
-<BorderPane maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.speedometer.PrimaryController">
-   <center>
-      <Gauge fx:id="speedometer" majorTickMarkType="TRAPEZOID" skinType="MODERN" tickLabelOrientation="ORTHOGONAL" BorderPane.alignment="CENTER">
-         <BorderPane.margin>
-            <Insets />
-         </BorderPane.margin></Gauge>
-   </center>
+<BorderPane fx:id="rootPane" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity" minWidth="-Infinity" prefHeight="711.0" prefWidth="1020.0" xmlns="http://javafx.com/javafx/23.0.1" xmlns:fx="http://javafx.com/fxml/1" fx:controller="com.mycompany.speedometer.PrimaryController">
    <top>
       <FlowPane prefHeight="59.0" prefWidth="600.0" BorderPane.alignment="CENTER">
          <children>
-            <ImageView fx:id="image" fitHeight="65.0" fitWidth="132.0" pickOnBounds="true" preserveRatio="true">
+            <ImageView fx:id="image" fitHeight="59.0" fitWidth="215.0" pickOnBounds="true" preserveRatio="true">
                <image>
                   <Image url="@images/Untitled.png" />
                </image>
@@ -37,7 +32,7 @@
       </FlowPane>
    </top>
    <bottom>
-      <VBox prefHeight="84.0" prefWidth="600.0" BorderPane.alignment="CENTER">
+      <VBox prefHeight="127.0" prefWidth="1020.0" BorderPane.alignment="CENTER">
          <children>
             <Label fx:id="latitudeLabel" text="Label">
                <VBox.margin>
@@ -49,14 +44,20 @@
                   <Insets left="270.0" top="10.0" />
                </VBox.margin>
             </Label>
+            <Label fx:id="warningLabel" text="Label" translateX="270.0" translateY="13.0" />
          </children>
       </VBox>
    </bottom>
-   <right>
-      <Label fx:id="warningLabel" text="Label" BorderPane.alignment="CENTER">
+   <left>
+      <Gauge fx:id="speedometer" majorTickMarkType="TRAPEZOID" prefHeight="525.0" prefWidth="558.0" skinType="MODERN" tickLabelOrientation="ORTHOGONAL" BorderPane.alignment="CENTER">
          <BorderPane.margin>
-            <Insets right="100.0" />
+            <Insets />
          </BorderPane.margin>
-      </Label>
-   </right>
+      </Gauge>
+   </left>
+   <center>
+      <WebView fx:id="mapView" prefHeight="509.0" prefWidth="530.0" BorderPane.alignment="CENTER" />
+   </center>
 </BorderPane>
+
+

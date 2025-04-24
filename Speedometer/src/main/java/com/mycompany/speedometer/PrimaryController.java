@@ -1,16 +1,9 @@
-/**
- * Where: PrimaryController.initialize() and PrimaryController.updateGPSData()
- * What Happens: The UI loads, configures the speedometer, and starts a thread to update the UI with GPS data.
+/***
+ * PrimaryController.java:
+ * - Manages the UI (speedometer, labels) and updates it with GPS data in a separate thread.
+ * - It also triggers the speed alarm.
  */
 
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/javafx/FXMLController.java to edit this template
- */
-/**
- *
- * @author fatma
- */
 package com.mycompany.speedometer;
 
 import eu.hansolo.medusa.Gauge;
@@ -18,68 +11,73 @@ import eu.hansolo.medusa.Section;
 import javafx.application.Platform;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.Label;
+import javafx.scene.control.ProgressIndicator;
+import javafx.scene.image.ImageView;
+import javafx.scene.layout.BorderPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.paint.Color;
+import javafx.scene.text.Font;
+import javafx.scene.text.FontPosture;
+import javafx.scene.web.WebEngine;
+import javafx.scene.web.WebView;
+
 import java.net.URL;
 import java.util.ResourceBundle;
-import javafx.scene.control.Label;
-import javafx.scene.paint.Color;
 
 public class PrimaryController implements Initializable {
 
-    /**
-     * UI components
-     */
-    
-    @FXML
-    private Gauge speedometer;
-    @FXML
-    private Label titleLabel; 
-    @FXML
-    private Label latitudeLabel;
-    @FXML
-    private Label longitudeLabel;
-    @FXML
-    private Label warningLabel;
-    /***
-     * running: boolean (volatile) - Controls the update thread.
-     */
+    @FXML private Gauge speedometer;
+    @FXML private Label titleLabel;
+    @FXML private Label latitudeLabel;
+    @FXML private Label longitudeLabel;
+    @FXML private Label warningLabel;
+    @FXML private ImageView image;
+    @FXML private WebView mapView;
+    @FXML private BorderPane rootPane; // Changed to BorderPane to match FXML
+
+    private WebEngine webEngine;
     private volatile boolean running = true;
+    private volatile boolean wasConnected = true;
+    private Alert disconnectAlert;
 
     @Override
     public void initialize(URL url, ResourceBundle rb) {
-        /**
-         * Configures the speedometer UI (detailed below).
-         */
         setupGauge();
-        /**
-         * Starts a thread to update the UI with GPS data
-         */
-        updateGPSData();
+        setupAppearance();
+
+        webEngine = mapView.getEngine();
+        String mapPath = getClass().getResource("/map.html").toExternalForm();
+        System.out.println("Loading map from: " + mapPath);
+        webEngine.load(mapPath);
+
+        webEngine.getLoadWorker().stateProperty().addListener((obs, oldState, newState) -> {
+            System.out.println("WebView state: " + newState);
+            if (newState == javafx.concurrent.Worker.State.SUCCEEDED) {
+                System.out.println("Map loaded successfully");
+                new Thread(this::updateGPSData).start();
+            } else if (newState == javafx.concurrent.Worker.State.FAILED) {
+                System.err.println("Map loading failed");
+            }
+        });
     }
 
     private void setupGauge() {
-        speedometer.setValue(0);//Sets initial speed to 0 km/h.
-        /**
-         * Sets speedometer range (0-160 km/h).
-         */
+        speedometer.setValue(0);
         speedometer.setMinValue(0);
         speedometer.setMaxValue(160);
-        /**
-         * Labels the gauge as "Speed" in "KM/H".
-         */
         speedometer.setTitle("Speed");
         speedometer.setUnit("KM/H");
-        /**
-         * Enables smooth needle animation and auto-scaling.
-         */
         speedometer.setAnimated(true);
         speedometer.setAutoScale(true);
-        speedometer.setNeedleColor(javafx.scene.paint.Color.RED);
-        speedometer.setBackgroundPaint(javafx.scene.paint.Color.BLACK);
-        speedometer.setBorderPaint(javafx.scene.paint.Color.DARKGRAY);
-        speedometer.setValueColor(javafx.scene.paint.Color.WHITE);
-        speedometer.setTitleColor(javafx.scene.paint.Color.LIGHTGRAY);
-        speedometer.setUnitColor(javafx.scene.paint.Color.YELLOW);
-        speedometer.setTickLabelColor(javafx.scene.paint.Color.LIGHTGRAY);
+        speedometer.setNeedleColor(Color.RED);
+        speedometer.setBackgroundPaint(Color.BLACK);
+        speedometer.setBorderPaint(Color.DARKGRAY);
+        speedometer.setValueColor(Color.WHITE);
+        speedometer.setTitleColor(Color.LIGHTGRAY);
+        speedometer.setUnitColor(Color.YELLOW);
+        speedometer.setTickLabelColor(Color.LIGHTGRAY);
         speedometer.setSectionsVisible(true);
         speedometer.setSections(
                 new Section(0, 50, Color.GREEN),
@@ -89,61 +87,97 @@ public class PrimaryController implements Initializable {
         warningLabel.setVisible(false);
     }
 
-    private void updateGPSData() {
-        /**
-         * Starts a background thread to update the UI every 2 seconds.
-         */
-        new Thread(() -> {
-            /**
-             * Loops as long as running is true (stops when stop() is called).
-             */
-            while (running) {
-                /**
-                 * Gets the GPSReader instance set by App from GPSData.
-                 */
-                GPSReader reader = GPSData.getReader();
-                /**
-                 * Ensures the reader is available before proceeding
-                 */
-                if (reader != null) { 
-                    //Retrieves the latest parsed GPS data from GPSReader.
-                    GPSData data = reader.getLatestData();
-                    /**
-                     * Runs UI updates on the JavaFX Application Thread (required for UI changes).
-                     */
-                    Platform.runLater(() -> {
-                        /**
-                         * Updates the latitude, Longitude labels, and the speedometer with the speed on km/h
-                         */
-                        latitudeLabel.setText(String.format("Latitude: %.6f° %s", data.getLatitude(), data.getLatDirection()));
-                        longitudeLabel.setText(String.format("Longitude: %.6f° %s", data.getLongitude(), data.getLonDirection()));
-                        speedometer.setValue(data.getSpeedKmh());
-                        /**
-                         * Checks if the speed triggers the alarm , and appeare label warning message 
-                         */
-                        SpeedAlarm.checkSpeed(data.getSpeedKmh());
-                        if(data.getSpeedKmh()> SpeedAlarm.SPEED_LIMIT)
-                        {
-                            warningLabel.setVisible(true);
-                            warningLabel.setText("⚠️ Speed Limit Exceeded!");
-                            warningLabel.setTextFill(Color.RED);
-                        }
-                    });
-                }
+    private void setupAppearance() {
+        // Set background color to gray (#404040)
+        rootPane.setStyle("-fx-background-color: #404040;");
 
-                try {
-                    /**
-                     * Pauses 2 seconds between updates.
-                     */
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
+        // Set latitude and longitude labels to glow green (#9FFD32) with italic font
+        latitudeLabel.setTextFill(Color.rgb(159, 253, 50));
+        longitudeLabel.setTextFill(Color.rgb(159, 253, 50));
+        Font italicFont = Font.font("System", FontPosture.ITALIC, 12); // Adjust size if needed
+        latitudeLabel.setFont(italicFont);
+        longitudeLabel.setFont(italicFont);
+    }
+
+    private void updateGPSData() {
+        while (running) {
+            GPSReader reader = GPSData.getReader();
+            if (reader != null) {
+                GPSData data = reader.getLatestData();
+                final boolean currentConnected = reader.isConnected();
+                final boolean prevWasConnected = wasConnected;
+
+                System.out.println("Connection state - wasConnected: " + wasConnected + ", currentConnected: " + currentConnected);
+
+                Platform.runLater(() -> {
+                    System.out.println("GUI update running");
+                    latitudeLabel.setText(String.format("Latitude: %.6f° %s", data.getLatitude(), data.getLatDirection()));
+                    longitudeLabel.setText(String.format("Longitude: %.6f° %s", data.getLongitude(), data.getLonDirection()));
+                    speedometer.setValue(data.getSpeedKmh());
+                    SpeedAlarm.checkSpeed(data.getSpeedKmh());
+                    if (data.getSpeedKmh() > SpeedAlarm.SPEED_LIMIT) {
+                        warningLabel.setVisible(true);
+                        warningLabel.setText("⚠️ Speed Limit Exceeded!");
+                        warningLabel.setTextFill(Color.RED);
+                    } else {
+                        warningLabel.setVisible(false);
+                    }
+
+                    if (webEngine != null) {
+                        String script = String.format("updateLocation(%f, %f);", data.getLatitude(), data.getLongitude());
+                        System.out.println("Executing script: " + script);
+                        try {
+                            webEngine.executeScript(script);
+                        } catch (Exception e) {
+                            System.err.println("Script error: " + e.getMessage());
+                        }
+                    }
+
+                    System.out.println("Evaluating: !currentConnected=" + !currentConnected + ", prevWasConnected=" + prevWasConnected);
+                    if (!currentConnected && prevWasConnected) {
+                        System.out.println("Condition met: Showing disconnect alert");
+                        showDisconnectAlert();
+                        System.out.println("Alert shown: " + (disconnectAlert != null && disconnectAlert.isShowing()));
+                    } else if (currentConnected && !prevWasConnected) {
+                        System.out.println("Condition met: Hiding disconnect alert");
+                        hideDisconnectAlert();
+                    }
+                });
+
+                wasConnected = currentConnected;
             }
-        }).start();
+
+            try {
+                Thread.sleep(500);
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+        }
+    }
+
+    private void showDisconnectAlert() {
+        if (disconnectAlert == null) {
+            System.out.println("Creating and showing alert");
+            disconnectAlert = new Alert(Alert.AlertType.WARNING);
+            disconnectAlert.setTitle("GPS Disconnected");
+            disconnectAlert.setHeaderText(null);
+            disconnectAlert.setContentText("GPS module disconnected. Attempting to reconnect...");
+            disconnectAlert.show();
+        }
+    }
+
+    private void hideDisconnectAlert() {
+        if (disconnectAlert != null) {
+            System.out.println("Hiding alert");
+            disconnectAlert.hide();
+            disconnectAlert = null;
+        }
     }
 
     public void stop() {
         running = false;
+        hideDisconnectAlert();
     }
 }
+
+

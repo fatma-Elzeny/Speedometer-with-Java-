@@ -9,4 +9,6 @@ module com.mycompany.speedometer {
     requires eu.hansolo.medusa;
     requires java.base;
     requires com.fazecast.jSerialComm;
+    requires javafx.web;
+
 }

@@ -111,14 +111,6 @@ private static void playAlarm()
 
         }
     }
-    
-    public static void stop() {
-        if (clip != null && clip.isRunning()) {
-            clip.stop();
-            clip.close();
-        }
-        isPlaying = false;
-    }
     private static void showSpeedAlert() 
     {
         if (speedAlert == null) { /*Only create if not already shown*/
@@ -135,6 +127,14 @@ private static void playAlarm()
             speedAlert.hide(); /*Hide the pop-up*/
             speedAlert = null; /*Reset to allow a new alert next time*/
         }
+    }
+    
+    public static void stop() {
+        if (clip != null && clip.isRunning()) {
+            clip.stop();
+            clip.close();
+        }
+        isPlaying = false;
     }
 
 }
